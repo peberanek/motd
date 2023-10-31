@@ -1,0 +1,48 @@
+#!/bin/python3
+"""Print a message of the day (motd) into stdout.
+
+Messages are selected at random from `~/.motd` (1 message per line).
+Blank lines and lines starting with `#` are ignored.
+"""
+
+import re
+import sys
+from pathlib import Path
+from random import choice
+
+INPUT_FILE: Path = Path().home() / ".motd"
+
+
+def read_message(file: Path) -> str:
+    """Return a random message of the day (motd) from `file`.
+
+    Args:
+        file (Path): a file containing messages of the day.
+
+    Returns:
+        str: a randomly selected message of the day.
+    """
+    try:
+        with file.open() as f:
+            lines = f.readlines()
+    except (FileNotFoundError, PermissionError) as exc:
+        raise RuntimeError(f"Cannot read message: {exc}") from exc
+
+    messages = [line for line in lines if not re.match(r"^\s*#|^\s*$", line)]
+    try:
+        return choice(messages)  # noqa: S311
+    except IndexError as exc:
+        raise RuntimeError(f"No message found in {file}") from exc
+
+
+def main():
+    """Main entry point."""
+    try:
+        print(read_message(INPUT_FILE), end="")
+    except RuntimeError as exc:
+        print(exc, file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

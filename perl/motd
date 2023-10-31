@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+#
+# Print a random message of the day into stdout. Messages are defined in
+# ${HOME}/.motd (1 message per line). Lines starting with '#' are ignored.
+#
+# I always wanted to write something in Perl, but never found enough
+# motivation to learn it (the language is horrible). Fortunately, the dilemma
+# has been resolved by GitHub copilot, who wrote most of this script.
+# Yay! So I hope I'm done with Perl forever.
+#
+
+use v5.35;  # enables both `strict` and `warnings`
+
+my $messages = $ENV{HOME} . "/.motd";
+open(my $fh, '<', $messages) or die "Can't open $messages: $!";
+
+my @lines;
+while (my $line = <$fh>) {
+    chomp $line;
+    push @lines, $line unless $line =~ /^#/;
+}
+
+print $lines[rand @lines], "\n";
+close $fh;
